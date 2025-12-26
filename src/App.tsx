@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { getRandomText } from './utils/textGenerator'
 import type { Difficulty } from './utils/textPools'
 import { DifficultySelect } from './components/DifficultySelect'
+import { TextDisplay } from './components/TextDisplay'
+import { Results } from './components/Result'
 import { useTimer } from './hooks/useTimer'
 import { useKeyboardTyping } from './hooks/useKeyboardTyping'
-import { TextDisplay } from './components/TextDisplay'
 
 export default function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
@@ -15,9 +16,22 @@ export default function App() {
     isLocked: timer.isFinished,
   })
 
+  const isFinished = timer.isFinished || typing.isFinished
+
   function restart(newDifficulty = difficulty) {
     setText(getRandomText(newDifficulty))
     timer.reset()
+    typing.reset()
+  }
+
+  if (isFinished) {
+    return (
+      <Results
+        wpm={typing.wpm}
+        accuracy={typing.accuracy}
+        onRestart={() => restart()}
+      />
+    )
   }
 
   return (
@@ -36,8 +50,6 @@ export default function App() {
 
       <p>WPM: {typing.wpm}</p>
       <p>Accuracy: {typing.accuracy}%</p>
-
-      {timer.isFinished && <button onClick={() => restart()}>Restart</button>}
     </div>
   )
 }

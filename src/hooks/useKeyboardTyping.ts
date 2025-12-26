@@ -1,55 +1,57 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { calculateAccuracy, calculateWPM } from '../utils/typingMetrics'
 
 type Options = {
     isLocked: boolean
 }
 
-export function useKeyboardTyping(targetText: string, options: Options) {
-    const { isLocked } = options
-
+export function useKeyboardTyping(targetText: string, { isLocked }: Options) {
     const [typed, setTyped] = useState('')
     const [startTime, setStartTime] = useState<number | null>(null)
+    const [isFinished, setIsFinished] = useState(false)
 
-    // 🔹 RESET when text changes
-    useEffect(() => {
+    const reset = useCallback(() => {
         setTyped('')
         setStartTime(null)
-    }, [targetText])
+        setIsFinished(false)
+    }, [])
+
+    useEffect(() => reset(), [targetText, reset])
 
     useEffect(() => {
         function onKeyDown(e: KeyboardEvent) {
-            if (isLocked) return
+            if (isLocked || isFinished) return
 
-            // Ignore modifier keys (Shift, Ctrl, Alt, etc.)
             if (e.key.length > 1 && e.key !== 'Backspace') return
 
-            if (!startTime) {
-                setStartTime(Date.now())
-            }
+            setStartTime((t) => t ?? Date.now())
 
-            if (e.key === 'Backspace') {
-                setTyped((prev) => prev.slice(0, -1))
-                return
-            }
+            setTyped((prev) => {
+                if (e.key === 'Backspace') {
+                    return prev.slice(0, -1)
+                }
 
-            if (typed.length >= targetText.length) return
+                if (prev.length >= targetText.length) return prev
 
-            setTyped((prev) => prev + e.key)
+                const next = prev + e.key
+                if (next.length === targetText.length) {
+                    setIsFinished(true)
+                }
+                return next
+            })
         }
 
         window.addEventListener('keydown', onKeyDown)
         return () => window.removeEventListener('keydown', onKeyDown)
-    }, [typed, targetText, startTime, isLocked])
+    }, [isLocked, isFinished, targetText])
 
-    const elapsedSeconds = startTime
-        ? (Date.now() - startTime) / 1000
-        : 0
+    const elapsed = startTime ? (Date.now() - startTime) / 1000 : 0
 
     return {
         typed,
-        cursor: typed.length,
+        isFinished,
+        reset,
         accuracy: calculateAccuracy(typed, targetText),
-        wpm: calculateWPM(typed.length, elapsedSeconds),
+        wpm: calculateWPM(typed.length, elapsed),
     }
 }
