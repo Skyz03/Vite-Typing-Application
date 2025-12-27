@@ -1,24 +1,41 @@
-type Props = {
-  target: string;
-  typed: string;
-};
-export function TextDisplay({ target, typed }: Props) {
+export function TextDisplay({
+  target,
+  typed,
+}: {
+  target: string
+  typed: string
+}) {
   return (
-    <div className="bg-gray-900 p-6 rounded-xl font-mono text-lg leading-relaxed">
+    <div
+      className="
+        bg-[var(--neutral-800)]
+        rounded-2xl
+        p-6
+        font-mono
+        text-lg
+        leading-relaxed
+        var(--red-500)
+      "
+      style={{ color: 'var(--neutral-500)' }}
+    >
       {target.split('').map((char, i) => {
-        let className = 'text-gray-500'
+        let style: React.CSSProperties = {}
 
         if (i < typed.length) {
-          className =
-            typed[i] === char ? 'text-green-400' : 'text-red-400'
+          style.color =
+            typed[i] === char
+              ? 'var(--green-500)'
+              : 'var(--red-500)'
         }
 
+        // ✅ Cursor
         if (i === typed.length) {
-          className += ' border-l-2 border-blue-400'
+          style.borderLeft = '2px solid var(--blue-600)'
+          style.marginLeft = -1
         }
 
         return (
-          <span key={i} className={className}>
+          <span key={i} style={style}>
             {char}
           </span>
         )
