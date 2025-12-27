@@ -1,4 +1,4 @@
-import type { Difficulty } from '../utils/textPools'
+import type { Difficulty } from '../../utils/textPools'
 
 type Props = {
   value: Difficulty

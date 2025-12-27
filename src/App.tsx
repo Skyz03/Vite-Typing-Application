@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { getRandomText } from './utils/textGenerator'
 import type { Difficulty } from './utils/textPools'
-import { DifficultySelect } from './components/DifficultySelect'
-import { TextDisplay } from './components/TextDisplay'
-import { Results } from './components/Result'
+import { DifficultySelect } from './components/controls/DifficultySelect'
+import { TextDisplay } from './components/typing/TextDisplay'
+import { Results } from './components/typing/Result'
 import { useTimer } from './hooks/useTimer'
 import { useKeyboardTyping } from './hooks/useKeyboardTyping'
 
