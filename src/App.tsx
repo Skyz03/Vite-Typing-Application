@@ -13,7 +13,7 @@ import { FocusOverlay } from './components/typing/FocusOverlay'
 export default function App() {
   // --- State ---
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
-  const [isStarted, setIsStarted] = useState(false);
+  const [isStarted, setIsStarted] = useState(false)
   const [mode, setMode] = useState<Mode>('timed')
   const [text, setText] = useState(() => getRandomText('easy'))
   const [bestWpm, setBestWpm] = useState<number>(() => {
@@ -22,12 +22,11 @@ export default function App() {
   })
 
   // --- Hooks ---
-  // If mode is timed, we want 60s. If passage, we start at 0 (counting up).
-  const initialTime = useMemo(() => (mode === 'timed' ? 60 : 0), [mode]);
+  const initialTime = useMemo(() => (mode === 'timed' ? 60 : 0), [mode])
   const timer = useTimer(initialTime)
 
   const typing = useKeyboardTyping(text, {
-    isLocked: mode === 'timed' ? timer.isFinished : false,
+    isLocked: !isStarted || (mode === 'timed' ? timer.isFinished : false),
   })
 
   // --- Actions ---
@@ -35,11 +34,11 @@ export default function App() {
     (newDifficulty = difficulty, newMode = mode) => {
       setDifficulty(newDifficulty)
       setMode(newMode)
-      setIsStarted(false);
-      // Distinct content types for different modes
-      const content = newMode === 'passage'
-        ? getLongPassage(newDifficulty)
-        : getRandomText(newDifficulty)
+      setIsStarted(false)
+      const content =
+        newMode === 'passage'
+          ? getLongPassage(newDifficulty)
+          : getRandomText(newDifficulty)
 
       setText(content)
       timer.reset()
@@ -49,13 +48,12 @@ export default function App() {
   )
 
   // --- Effects ---
-
-  // 1. Start timer on first keypress
+  // 1. Start timer on first keypress (only if overlay is gone)
   useEffect(() => {
     if (isStarted && typing.typed.length === 1 && !timer.isRunning) {
-      timer.start();
+      timer.start()
     }
-  }, [typing.typed.length, timer.isRunning, timer, isStarted]);
+  }, [typing.typed.length, timer.isRunning, timer, isStarted])
 
   // 2. Stop timer on finish
   useEffect(() => {
@@ -76,65 +74,66 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [restart])
 
-  // 4. Update PB and logic for "isFinished"
+  // --- Logic for Results ---
   const isFinished = (mode === 'timed' && timer.isFinished && typing.typed.length > 0) || typing.isFinished
+  const isBaseline = bestWpm === 0
+  const isNewRecord = typing.wpm > bestWpm
 
+  // Update localStorage only when finished
   useEffect(() => {
-    if (isFinished && typing.wpm > bestWpm) {
-      setBestWpm(typing.wpm)
+    if (isFinished && isNewRecord) {
       localStorage.setItem('typing-pb', String(typing.wpm))
     }
-  }, [isFinished, typing.wpm, bestWpm])
+  }, [isFinished, isNewRecord, typing.wpm])
 
   // --- Render Results ---
   if (isFinished) {
     return (
-      <div className="bg-app-bg animate-in fade-in flex min-h-screen items-center justify-center p-6">
+      <div className="bg-app-bg flex min-h-screen items-center justify-center p-6 animate-in fade-in duration-500">
         <Results
           wpm={typing.wpm}
           accuracy={typing.accuracy}
-          totalTyped={typing.totalTyped}
-          totalErrors={typing.totalErrors}
-          isNewRecord={typing.wpm > bestWpm}
-          onRestart={() => restart()}
+          totalTyped={typing.typed.length}
+          totalErrors={typing.totalErrors} // Ensure your hook exports this
+          isNewRecord={isNewRecord}
+          isBaseline={isBaseline}
+          onRestart={() => {
+            if (isNewRecord) setBestWpm(typing.wpm)
+            restart()
+          }}
         />
       </div>
     )
   }
 
-  // --- Main Render ---
   return (
     <main className="bg-app-bg text-txt-main selection:bg-type-primary/30 min-h-screen p-8 antialiased">
       <div className="mx-auto flex max-w-5xl flex-col gap-10">
         <Header bestWpm={bestWpm} />
 
         <div className="border-app-border flex flex-col items-center justify-between gap-6 border-b pb-6 md:flex-row">
-          {/* Stats Group */}
           <div className="flex items-center gap-10">
             <StatItem label="WPM" value={typing.wpm} />
-
             <StatItem
               label="Accuracy"
               value={`${typing.accuracy}%`}
               className={typing.accuracy < 90 ? 'text-type-error' : 'text-stat-acc'}
             />
-
             <StatItem
-              label={mode === 'timed' ? "Time Left" : "Time Taken"}
+              label={mode === 'timed' ? 'Time Left' : 'Time Taken'}
               value={`${mode === 'timed' ? timer.timeLeft : timer.timeElapsed}s`}
-              className={mode === 'timed' && timer.timeLeft <= 5 ? 'text-type-error animate-pulse' : 'text-type-primary'}
+              className={
+                mode === 'timed' && timer.timeLeft <= 5
+                  ? 'text-type-error animate-pulse'
+                  : 'text-type-primary'
+              }
             />
           </div>
 
-          {/* Controls Group */}
           <div className="flex items-center gap-4">
-            <DifficultySelect
-              value={difficulty}
-              onChange={(d) => restart(d, mode)}
-            />
+            <DifficultySelect value={difficulty} onChange={(d) => restart(d, mode)} />
             <div className="bg-app-border mx-2 h-6 w-[1px]" />
             <ModeSelect
-              // Prevent mode switching mid-test
               disabled={typing.typed.length > 0 && !isFinished}
               value={mode}
               onChange={(m) => restart(difficulty, m)}
@@ -142,7 +141,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Passage Progress Bar - Unique to Passage Mode */}
         {mode === 'passage' && (
           <div className="bg-app-surface h-1 w-full rounded-full overflow-hidden -mb-6">
             <div
@@ -151,15 +149,15 @@ export default function App() {
             />
           </div>
         )}
-        <section className="relative group cursor-pointer" onClick={() => !isStarted && setIsStarted(true)}>
 
-          {/* The Overlay - Hidden when isStarted is true */}
+        <section
+          className="relative group cursor-pointer"
+          onClick={() => !isStarted && setIsStarted(true)}
+        >
           {!isStarted && <FocusOverlay onStart={() => setIsStarted(true)} />}
-
           <div className={`transition-all duration-700 ${!isStarted ? 'blur-md select-none opacity-50' : 'blur-0 opacity-100'}`}>
             <TextDisplay target={text} typed={typing.typed} />
           </div>
-
         </section>
 
         <footer className="mt-4 flex flex-col items-center gap-4">
@@ -179,8 +177,7 @@ export default function App() {
   )
 }
 
-// Internal component for cleaner stat rendering
-function StatItem({ label, value, className = "text-white" }: { label: string, value: string | number, className?: string }) {
+function StatItem({ label, value, className = 'text-white' }: { label: string; value: string | number; className?: string }) {
   return (
     <div className="flex flex-col border-l border-app-border pl-10 first:border-l-0 first:pl-0">
       <span className="text-txt-muted font-sans text-[10px] font-black tracking-[0.2em] uppercase leading-relaxed">
