@@ -1,97 +1,88 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 
 type ResultsProps = {
   wpm: number;
   accuracy: number;
-  isNewRecord?: boolean; // We added this prop in App.tsx
+  totalTyped: number;
+  totalErrors: number;
+  isNewRecord?: boolean;
   onRestart: () => void;
 };
 
-export function Results({ wpm, accuracy, isNewRecord, onRestart }: ResultsProps) {
+export function Results({ wpm, accuracy, totalTyped, totalErrors, isNewRecord, onRestart }: ResultsProps) {
   useEffect(() => {
     if (isNewRecord) {
-      // Professional "Gold" celebration
-      const end = Date.now() + 2 * 1000;
-      const colors = ['#eab308', '#ffffff'];
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-      (function frame() {
-        confetti({
-          particleCount: 2,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: colors
-        });
-        confetti({
-          particleCount: 2,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: colors
-        });
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      }());
+      const interval: any = setInterval(function () {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+      }, 250);
     }
   }, [isNewRecord]);
 
   return (
-    <div className="flex flex-col items-center bg-app-surface border border-app-border p-10 rounded-3xl shadow-2xl max-w-md w-full animate-in zoom-in duration-500">
+    <div className="flex flex-col items-center bg-app-surface border border-app-border p-12 rounded-3xl shadow-2xl max-w-2xl w-full animate-in zoom-in duration-500 text-center">
 
-      {/* 🏆 NEW RECORD ANIMATION SECTION */}
-      {/* 🏆 NEW RECORD ANIMATION SECTION */}
-      {isNewRecord && (
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative">
-            {/* The Trophy */}
-            <span className="text-6xl drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">🏆</span>
-
-            {/* Enhanced Sparkles */}
-            <span className="absolute -top-4 -right-4 animate-sparkle text-2xl">✨</span>
-            <span className="absolute top-0 -left-6 animate-sparkle delay-500 text-xl">✨</span>
-            <span className="absolute -bottom-2 right-6 animate-sparkle delay-700 text-lg">⭐</span>
+      {/* Dynamic Header from Goal Images */}
+      <div className="mb-10">
+        {isNewRecord ? (
+          <div className="flex flex-col items-center">
+            <span className="text-5xl mb-4">🎉</span>
+            <h1 className="text-4xl font-black text-white tracking-tight mb-2">High Score Smashed!</h1>
+            <p className="text-txt-muted font-medium">You're getting faster. That was incredible typing.</p>
           </div>
-
-          <div className="text-center mt-4">
-            <h2 className="text-type-primary font-black uppercase tracking-[0.4em] text-sm animate-pulse">
-              New Personal Best
-            </h2>
-            <div className="h-1 w-12 bg-type-primary mx-auto mt-2 rounded-full opacity-50" />
+        ) : (
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
+              <span className="text-3xl font-bold">✓</span>
+            </div>
+            <h1 className="text-4xl font-black text-white tracking-tight mb-2">Baseline Established!</h1>
+            <p className="text-txt-muted font-medium">You've set the bar. Now the real challenge begins.</p>
           </div>
-        </div>
-      )}
-
-      <h1 className="text-txt-muted font-bold uppercase tracking-widest text-xs mb-8">
-        Test Results
-      </h1>
-
-      <div className="grid grid-cols-2 gap-12 mb-10 w-full">
-        <div className="flex flex-col items-center">
-          <span className="text-txt-muted text-[10px] font-black uppercase tracking-widest mb-1">WPM</span>
-          <span className="text-5xl font-mono font-black text-white">{wpm}</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-txt-muted text-[10px] font-black uppercase tracking-widest mb-1">Accuracy</span>
-          <span className={`text-5xl font-mono font-black ${accuracy > 95 ? 'text-stat-acc' : 'text-type-error'}`}>
-            {accuracy}%
-          </span>
-        </div>
+        )}
       </div>
 
-      {/* Action Button */}
+      {/* 3-Card Stat Grid */}
+      <div className="grid grid-cols-3 gap-6 w-full mb-12">
+        <StatCard label="WPM" value={wpm} />
+        <StatCard label="Accuracy" value={`${accuracy}%`} valueClass={accuracy < 90 ? 'text-type-error' : 'text-stat-acc'} />
+        <StatCard
+          label="Characters"
+          value={
+            <div className="flex items-baseline justify-center gap-1">
+              <span className="text-stat-acc">{totalTyped}</span>
+              <span className="text-txt-muted text-xl">/</span>
+              <span className="text-type-error">{totalErrors}</span>
+            </div>
+          }
+        />
+      </div>
+
       <button
         onClick={onRestart}
-        className="w-full bg-type-primary text-app-bg font-black py-4 rounded-xl hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+        className="bg-white text-app-bg font-black px-12 py-4 rounded-xl hover:scale-105 active:scale-95 transition-all uppercase tracking-widest text-sm shadow-xl"
       >
-        Try to beat it ↺
+        Beat This Score ↺
       </button>
+    </div>
+  );
+}
 
-      <p className="mt-4 text-txt-muted text-[10px] font-bold uppercase tracking-widest">
-        Press <kbd className="bg-app-bg px-1.5 py-0.5 rounded border border-app-border mx-1">Tab</kbd> to restart
-      </p>
+function StatCard({ label, value, valueClass = "text-white" }: { label: string, value: any, valueClass?: string }) {
+  return (
+    <div className="bg-app-bg/40 border border-app-border p-6 rounded-2xl flex flex-col items-center shadow-inner">
+      <span className="text-txt-muted text-[10px] font-black uppercase tracking-widest mb-3">{label}</span>
+      <span className={`text-4xl font-mono font-black ${valueClass}`}>{value}</span>
     </div>
   );
 }

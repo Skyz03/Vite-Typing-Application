@@ -8,10 +8,12 @@ import { Results } from './components/typing/Result'
 import { Header } from './components/layout/Header'
 import { useTimer } from './hooks/useTimer'
 import { useKeyboardTyping } from './hooks/useKeyboardTyping'
+import { FocusOverlay } from './components/typing/FocusOverlay'
 
 export default function App() {
   // --- State ---
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
+  const [isStarted, setIsStarted] = useState(false);
   const [mode, setMode] = useState<Mode>('timed')
   const [text, setText] = useState(() => getRandomText('easy'))
   const [bestWpm, setBestWpm] = useState<number>(() => {
@@ -33,7 +35,7 @@ export default function App() {
     (newDifficulty = difficulty, newMode = mode) => {
       setDifficulty(newDifficulty)
       setMode(newMode)
-
+      setIsStarted(false);
       // Distinct content types for different modes
       const content = newMode === 'passage'
         ? getLongPassage(newDifficulty)
@@ -50,10 +52,10 @@ export default function App() {
 
   // 1. Start timer on first keypress
   useEffect(() => {
-    if (typing.typed.length === 1 && !timer.isRunning) {
-      timer.start()
+    if (isStarted && typing.typed.length === 1 && !timer.isRunning) {
+      timer.start();
     }
-  }, [typing.typed.length, timer.isRunning, timer])
+  }, [typing.typed.length, timer.isRunning, timer, isStarted]);
 
   // 2. Stop timer on finish
   useEffect(() => {
@@ -91,6 +93,8 @@ export default function App() {
         <Results
           wpm={typing.wpm}
           accuracy={typing.accuracy}
+          totalTyped={typing.totalTyped}
+          totalErrors={typing.totalErrors}
           isNewRecord={typing.wpm > bestWpm}
           onRestart={() => restart()}
         />
@@ -147,9 +151,15 @@ export default function App() {
             />
           </div>
         )}
+        <section className="relative group cursor-pointer" onClick={() => !isStarted && setIsStarted(true)}>
 
-        <section className="relative">
-          <TextDisplay target={text} typed={typing.typed} />
+          {/* The Overlay - Hidden when isStarted is true */}
+          {!isStarted && <FocusOverlay onStart={() => setIsStarted(true)} />}
+
+          <div className={`transition-all duration-700 ${!isStarted ? 'blur-md select-none opacity-50' : 'blur-0 opacity-100'}`}>
+            <TextDisplay target={text} typed={typing.typed} />
+          </div>
+
         </section>
 
         <footer className="mt-4 flex flex-col items-center gap-4">
