@@ -1,5 +1,5 @@
 import { type Difficulty, textPools } from './textPools'
-import { passages } from './textPools'
+import { PASSAGES } from './textPools'
 
 export function getRandomText(difficulty: Difficulty): string {
   const pool = textPools[difficulty]
@@ -8,6 +8,6 @@ export function getRandomText(difficulty: Difficulty): string {
 }
 
 export const getLongPassage = (diff: Difficulty) => {
-  const pool = passages[diff];
-  return pool[Math.floor(Math.random() * pool.length)];
+  const pool = PASSAGES[diff]
+  return pool[Math.floor(Math.random() * pool.length)]
 }

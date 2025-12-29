@@ -1,1 +1,31 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@layer base {
+  html {
+    /* Apply the font smoothing you requested */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: var(--color-app-bg);
+    color: var(--color-txt-main);
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  /* Custom Scrollbar to match the dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-app-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-app-border);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-txt-muted);
+  }
+}
