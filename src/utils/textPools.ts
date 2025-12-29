@@ -17,3 +17,5 @@ export const textPools: Record<Difficulty, string[]> = {
     'performance optimization requires careful measurement',
   ],
 }
+
+export type Mode = 'timed' | 'passage';

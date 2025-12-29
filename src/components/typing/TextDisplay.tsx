@@ -20,19 +20,20 @@ export function TextDisplay({
           const isError = isTyped && typed[i] !== char;
           const isCorrect = isTyped && typed[i] === char;
 
+          // Inside your character map in TextDisplay.tsx
+
           return (
             <span
               key={i}
               className={`
-                relative transition-all duration-75
-                ${isCorrect ? 'text-type-primary' : ''}
-                ${isError ? 'text-type-error bg-type-error-bg' : ''}
-                ${!isTyped ? 'text-txt-muted' : ''}
-                ${isCurrent ? 'after:content-[""] after:absolute after:left-0 after:bottom-0 after:w-full after:h-[2px] after:bg-blue-500 after:animate-pulse' : ''}
-              `}
+      relative px-[1px] rounded-sm transition-all duration-75
+      ${isCorrect ? 'text-type-success' : ''}
+      ${isError ? 'text-type-error border-b-2 border-type-error' : ''}
+      ${!isTyped && !isCurrent ? 'text-txt-muted' : ''}
+      ${isCurrent ? 'bg-neutral-600 text-white animate-pulse' : ''} 
+    `}
             >
-              {/* Special visual for missed spaces */}
-              {isError && char === ' ' ? '·' : char}
+              {char}
             </span>
           );
         })}
