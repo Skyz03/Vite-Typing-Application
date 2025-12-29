@@ -19,3 +19,10 @@ export const textPools: Record<Difficulty, string[]> = {
 }
 
 export type Mode = 'timed' | 'passage';
+
+export const passages = {
+  easy: ["The quick brown fox jumps over the lazy dog", "A journey of a thousand miles begins with a single step."],
+  medium: ["The archaeological expedition unearthed artifacts that complicated prevailing theories about Bronze Age trade", "The complexity of modern web development requires a deep understanding of both logic and design."],
+  hard: ["Schrodinger's cat is a thought experiment, sometimes described as a paradox, devised by Austrian physicist Erwin Schrödinger in 1935"]
+}
+

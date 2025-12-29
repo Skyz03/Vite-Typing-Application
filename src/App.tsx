@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getRandomText } from './utils/textGenerator'
+import { getRandomText, getLongPassage } from './utils/textGenerator'
 import type { Difficulty, Mode } from './utils/textPools'
 import { DifficultySelect } from './components/controls/DifficultySelect'
 import { ModeSelect } from './components/controls/ModeSelect'
@@ -27,10 +27,14 @@ export default function App() {
   const restart = useCallback((newDifficulty = difficulty, newMode = mode) => {
     setDifficulty(newDifficulty)
     setMode(newMode)
-    setText(getRandomText(newDifficulty))
+    const content = newMode === 'passage'
+      ? getLongPassage(newDifficulty) // New function for stories/articles
+      : getRandomText(newDifficulty); // Existing function for random words
+    setText(content);
     timer.reset()
     typing.reset()
   }, [difficulty, mode, timer, typing])
+
 
   // --- Effects ---
 
