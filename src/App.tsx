@@ -15,6 +15,12 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('timed')
   const [text, setText] = useState(() => getRandomText('easy'))
 
+  // Initialize bestWpm from localStorage
+  const [bestWpm, setBestWpm] = useState<number>(() => {
+    const saved = localStorage.getItem('typing-pb')
+    return saved ? Number(saved) : 0
+  })
+
   // We'll assume a 60s default for timed, and 0 for passage (counting up)
   const timer = useTimer(mode === 'timed' ? 60 : 0)
   const typing = useKeyboardTyping(text, {
@@ -74,6 +80,14 @@ export default function App() {
     (mode === 'timed' && timer.isFinished && typing.typed.length > 0) ||
     typing.isFinished
 
+  // NEW: Update Personal Best when a test finishes
+  useEffect(() => {
+    if (isFinished && typing.wpm > bestWpm) {
+      setBestWpm(typing.wpm)
+      localStorage.setItem('typing-pb', String(typing.wpm))
+    }
+  }, [isFinished, typing.wpm, bestWpm])
+
   // --- Render Results ---
   if (isFinished) {
     return (
@@ -92,7 +106,7 @@ export default function App() {
     <main className="bg-app-bg text-txt-main selection:bg-type-primary/30 min-h-screen p-8 antialiased transition-colors duration-500">
       <div className="mx-auto flex max-w-5xl flex-col gap-10">
         {/* Branding Header (matching image top right PB) */}
-        <Header bestWpm={92} />
+        <Header bestWpm={bestWpm} />
 
         {/* The Control & Stats Bar (Top Bar from Goal Image) */}
         <div className="border-app-border flex flex-col items-center justify-between gap-6 border-b pb-6 transition-all md:flex-row">
@@ -111,9 +125,8 @@ export default function App() {
                 Accuracy
               </span>
               <span
-                className={`font-mono text-3xl leading-none font-black tracking-tighter ${
-                  typing.accuracy < 90 ? 'text-type-error' : 'text-stat-acc'
-                }`}
+                className={`font-mono text-3xl leading-none font-black tracking-tighter ${typing.accuracy < 90 ? 'text-type-error' : 'text-stat-acc'
+                  }`}
               >
                 {typing.accuracy}%
               </span>
@@ -123,11 +136,10 @@ export default function App() {
                 Time
               </span>
               <span
-                className={`font-mono text-3xl leading-none font-black tracking-tighter ${
-                  mode === 'timed' && timer.timeLeft <= 5
-                    ? 'text-type-error animate-pulse'
-                    : 'text-type-primary'
-                }`}
+                className={`font-mono text-3xl leading-none font-black tracking-tighter ${mode === 'timed' && timer.timeLeft <= 5
+                  ? 'text-type-error animate-pulse'
+                  : 'text-type-primary'
+                  }`}
               >
                 {mode === 'timed' ? timer.timeLeft : timer.timeElapsed}s
               </span>
