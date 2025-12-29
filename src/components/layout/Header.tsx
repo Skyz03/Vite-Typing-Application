@@ -1,16 +1,18 @@
 export function Header({ bestWpm }: { bestWpm: number }) {
   return (
-    <header className="mb-6 flex items-center justify-between">
-      <h1 className="text-lg font-semibold text-[var(--neutral-0)]">
-        ⌨ Typing Speed Test
+    <header className="mb-10 flex items-center justify-between border-b border-app-border pb-6">
+      <h1 className="text-xl font-bold tracking-tight text-txt-main flex items-center gap-2">
+        <span className="text-type-primary text-2xl">⌨</span> Typing Speed Test
       </h1>
 
-      <span className="text-sm text-[var(--neutral-400)]">
-        🏆 Personal best{' '}
-        <span className="font-medium text-[var(--blue-400)]">
+      <div className="flex items-center gap-2 px-4 py-2 bg-app-surface rounded-full border border-app-border shadow-sm">
+        <span className="text-xs uppercase font-bold tracking-wider text-txt-muted">
+          🏆 Personal Best
+        </span>
+        <span className="font-mono font-black text-stat-wpm">
           {bestWpm} WPM
         </span>
-      </span>
+      </div>
     </header>
   )
 }
