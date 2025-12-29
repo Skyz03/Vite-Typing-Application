@@ -1,65 +1,97 @@
-type ResultsProps = {
-  wpm: number
-  accuracy: number
-  onRestart: () => void
-}
+import { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 
-export function Results({ wpm, accuracy, onRestart }: ResultsProps) {
+type ResultsProps = {
+  wpm: number;
+  accuracy: number;
+  isNewRecord?: boolean; // We added this prop in App.tsx
+  onRestart: () => void;
+};
+
+export function Results({ wpm, accuracy, isNewRecord, onRestart }: ResultsProps) {
+  useEffect(() => {
+    if (isNewRecord) {
+      // Professional "Gold" celebration
+      const end = Date.now() + 2 * 1000;
+      const colors = ['#eab308', '#ffffff'];
+
+      (function frame() {
+        confetti({
+          particleCount: 2,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors
+        });
+        confetti({
+          particleCount: 2,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+  }, [isNewRecord]);
+
   return (
-    <div className="animate-in fade-in zoom-in flex w-full max-w-md flex-col items-center justify-center rounded-3xl border border-neutral-800 bg-neutral-900 p-12 shadow-2xl duration-300">
-      <h1 className="text--red-500 mb-8 text-sm font-bold tracking-[0.2em] uppercase">
-        Test Complete
+    <div className="flex flex-col items-center bg-app-surface border border-app-border p-10 rounded-3xl shadow-2xl max-w-md w-full animate-in zoom-in duration-500">
+
+      {/* 🏆 NEW RECORD ANIMATION SECTION */}
+      {/* 🏆 NEW RECORD ANIMATION SECTION */}
+      {isNewRecord && (
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative">
+            {/* The Trophy */}
+            <span className="text-6xl drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">🏆</span>
+
+            {/* Enhanced Sparkles */}
+            <span className="absolute -top-4 -right-4 animate-sparkle text-2xl">✨</span>
+            <span className="absolute top-0 -left-6 animate-sparkle delay-500 text-xl">✨</span>
+            <span className="absolute -bottom-2 right-6 animate-sparkle delay-700 text-lg">⭐</span>
+          </div>
+
+          <div className="text-center mt-4">
+            <h2 className="text-type-primary font-black uppercase tracking-[0.4em] text-sm animate-pulse">
+              New Personal Best
+            </h2>
+            <div className="h-1 w-12 bg-type-primary mx-auto mt-2 rounded-full opacity-50" />
+          </div>
+        </div>
+      )}
+
+      <h1 className="text-txt-muted font-bold uppercase tracking-widest text-xs mb-8">
+        Test Results
       </h1>
 
-      <div className="mb-10 flex gap-12">
-        {/* WPM Metric */}
-        <div className="text-center">
-          <p className="mb-1 text-xs font-bold text-red-500 uppercase">WPM</p>
-          <p className="text-6xl font-black tracking-tighter text-blue-500">
-            {wpm}
-          </p>
+      <div className="grid grid-cols-2 gap-12 mb-10 w-full">
+        <div className="flex flex-col items-center">
+          <span className="text-txt-muted text-[10px] font-black uppercase tracking-widest mb-1">WPM</span>
+          <span className="text-5xl font-mono font-black text-white">{wpm}</span>
         </div>
-
-        {/* Divider */}
-        <div className="w-[1px] bg-neutral-800" />
-
-        {/* Accuracy Metric */}
-        <div className="text-center">
-          <p className="mb-1 text-xs font-bold text-neutral-500 uppercase">
-            Accuracy
-          </p>
-          <p className="text-6xl font-black tracking-tighter text-green-500">
-            {accuracy}
-            <span className="ml-0.5 text-2xl">%</span>
-          </p>
+        <div className="flex flex-col items-center">
+          <span className="text-txt-muted text-[10px] font-black uppercase tracking-widest mb-1">Accuracy</span>
+          <span className={`text-5xl font-mono font-black ${accuracy > 95 ? 'text-stat-acc' : 'text-type-error'}`}>
+            {accuracy}%
+          </span>
         </div>
       </div>
 
       {/* Action Button */}
       <button
         onClick={onRestart}
-        className="group relative flex w-full items-center justify-center rounded-xl bg-neutral-100 py-4 font-bold text-neutral-950 transition-all hover:bg-white active:scale-95"
+        className="w-full bg-type-primary text-app-bg font-black py-4 rounded-xl hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(234,179,8,0.3)]"
       >
-        <span>Restart Test</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="ml-2 h-5 w-5 transition-transform duration-500 group-hover:rotate-180"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
+        Try to beat it ↺
       </button>
 
-      <p className="mt-6 text-xs text-neutral-600 italic">
-        Tip: Accuracy is more important than speed!
+      <p className="mt-4 text-txt-muted text-[10px] font-bold uppercase tracking-widest">
+        Press <kbd className="bg-app-bg px-1.5 py-0.5 rounded border border-app-border mx-1">Tab</kbd> to restart
       </p>
     </div>
-  )
+  );
 }

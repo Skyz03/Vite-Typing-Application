@@ -30,3 +30,50 @@
   --color-stat-wpm: #3b82f6; /* Blue for speed */
   --color-stat-acc: #10b981; /* Emerald for accuracy */
 }
+
+
+@layer base {
+  html {
+    /* Apply the font smoothing you requested */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: var(--color-app-bg);
+    color: var(--color-txt-main);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: aquamarine !important;
+  }
+
+  /* Custom Scrollbar to match the dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-app-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-app-border);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-txt-muted);
+  }
+}
+
+@layer utilities {
+    @keyframes sparkle {
+      0%, 100% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+  
+    .animate-sparkle {
+      animation: sparkle 1.5s ease-in-out infinite;
+    }
+  
+    .delay-500 {
+      animation-delay: 500ms;
+    }
+  }
