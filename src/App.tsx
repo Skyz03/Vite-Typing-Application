@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { getRandomText, getLongPassage } from './utils/textGenerator'
+import { getAppText } from './utils/textGenerator'
 import type { Difficulty, Mode } from './utils/textPools'
 import { TextDisplay } from './components/typing/TextDisplay'
 import { Results } from './components/typing/Result'
@@ -11,16 +11,17 @@ export default function App() {
   // --- State ---
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
   const [isStarted, setIsStarted] = useState(false)
-  const [mode, setMode] = useState<Mode>('timed')
-  const [text, setText] = useState(() => getRandomText('easy'))
+  const [mode, setMode] = useState<'timed' | 'passage'>('timed');
+  const [text, setText] = useState(() => getAppText('timed', 'easy'))
+
   const [bestWpm, setBestWpm] = useState<number>(() => {
     const saved = localStorage.getItem('typing-pb')
     return saved ? Number(saved) : 0
   })
 
   // --- Hooks ---
-  const initialTime = useMemo(() => (mode === 'timed' ? 60 : 0), [mode])
-  const timer = useTimer(initialTime)
+  const initialTime = mode === 'timed' ? 60 : 0;
+  const timer = useTimer(initialTime, mode);
 
   const typing = useKeyboardTyping(text, {
     // Only lock typing if the overlay is visible or the timer finished
@@ -33,12 +34,8 @@ export default function App() {
       setDifficulty(newDifficulty)
       setMode(newMode)
       setIsStarted(false)
-      const content =
-        newMode === 'passage'
-          ? getLongPassage(newDifficulty)
-          : getRandomText(newDifficulty)
-
-      setText(content)
+      const newText = getAppText(newMode, newDifficulty);
+      setText(newText)
       timer.reset()
       typing.reset()
     },
@@ -81,10 +78,10 @@ export default function App() {
 
   // 4. Persistence
   useEffect(() => {
-    if (isFinished && isNewRecord) {
+    if (isFinished && typing.wpm > bestWpm) {
       localStorage.setItem('typing-pb', String(typing.wpm))
     }
-  }, [isFinished, isNewRecord, typing.wpm])
+  }, [isFinished, bestWpm, typing.wpm])
 
   // --- Render Results View ---
   if (isFinished) {
@@ -93,12 +90,12 @@ export default function App() {
         <Results
           wpm={typing.wpm}
           accuracy={typing.accuracy}
-          totalTyped={typing.typed.length}
+          totalTyped={typing.totalTyped}
           totalErrors={typing.totalErrors}
           isNewRecord={isNewRecord}
           isBaseline={isBaseline}
           onRestart={() => {
-            if (isNewRecord) setBestWpm(typing.wpm)
+            if (isNewRecord) setBestWpm(typing.wpm);
             restart()
           }}
         />
@@ -134,7 +131,7 @@ export default function App() {
           <AppleStat label="Accuracy" value={`${typing.accuracy}%`} />
           <AppleStat
             label={mode === 'timed' ? 'Remaining' : 'Elapsed'}
-            value={`${mode === 'timed' ? timer.timeLeft : timer.timeElapsed}s`}
+            value={`${timer.time}s`}
           />
         </div>
 
@@ -158,11 +155,10 @@ export default function App() {
           {!isStarted && <FocusOverlay onStart={() => setIsStarted(true)} />}
 
           <div
-            className={`transition-all duration-700 ${
-              !isStarted
-                ? 'pointer-events-none scale-[0.98] opacity-30 blur-xl select-none'
-                : 'blur-0 scale-100 opacity-100'
-            }`}
+            className={`transition-all duration-700 ${!isStarted
+              ? 'pointer-events-none scale-[0.98] opacity-30 blur-xl select-none'
+              : 'blur-0 scale-100 opacity-100'
+              }`}
           >
             <TextDisplay target={text} typed={typing.typed} />
           </div>
@@ -176,11 +172,10 @@ export default function App() {
               <button
                 key={d}
                 onClick={() => restart(d, mode)}
-                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${
-                  difficulty === d
-                    ? 'bg-txt-main text-app-surface shadow-md'
-                    : 'text-txt-muted hover:text-txt-main'
-                }`}
+                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${difficulty === d
+                  ? 'bg-txt-main text-app-surface shadow-md'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
               >
                 {d.charAt(0).toUpperCase() + d.slice(1)}
               </button>
@@ -188,22 +183,30 @@ export default function App() {
           </div>
 
           {/* Mode Segment */}
-          <div className="bg-app-surface shadow-apple border-app-border flex rounded-full border p-1">
-            {(['timed', 'passage'] as Mode[]).map((m) => (
+          <div className="flex flex-col items-center gap-4">
+
+            <div className="bg-app-surface p-1 rounded-full shadow-apple border border-app-border flex">
               <button
-                key={m}
-                disabled={typing.typed.length > 0 && !isFinished}
-                onClick={() => restart(difficulty, m)}
-                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all disabled:opacity-50 ${
-                  mode === m
-                    ? 'bg-txt-main text-app-surface shadow-md'
-                    : 'text-txt-muted hover:text-txt-main'
-                }`}
+                onClick={() => restart(difficulty, 'timed')}
+                className={`px-6 py-1.5 rounded-full text-xs font-semibold transition-all btn-apple ${mode === 'timed'
+                  ? 'bg-txt-main text-app-surface shadow-sm'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
               >
-                {m.charAt(0).toUpperCase() + m.slice(1)}
+                Timed (60s)
               </button>
-            ))}
+              <button
+                onClick={() => restart(difficulty, 'passage')}
+                className={`px-6 py-1.5 rounded-full text-xs font-semibold transition-all btn-apple ${mode === 'passage'
+                  ? 'bg-txt-main text-app-surface shadow-sm'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
+              >
+                Passage
+              </button>
+            </div>
           </div>
+
 
           <button
             onClick={() => restart()}

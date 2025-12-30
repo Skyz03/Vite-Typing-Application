@@ -1,62 +1,58 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+// hooks/useTimer.ts
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useTimer(duration: number) {
-  const [timeLeft, setTimeLeft] = useState(duration)
-  const [isRunning, setIsRunning] = useState(false)
-  const intervalRef = useRef<number | null>(null)
+export function useTimer(initialTime: number, mode: 'timed' | 'passage') {
+  const [time, setTime] = useState(initialTime);
+  const [isRunning, setIsRunning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Helper to clear interval
-  const clear = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-  }, [])
+  // Sync time if initialTime changes (e.g., when switching modes)
+  useEffect(() => {
+    setTime(initialTime);
+  }, [initialTime]);
 
-  const start = useCallback(() => {
-    if (isRunning || (duration > 0 && timeLeft <= 0)) return
-    setIsRunning(true)
-  }, [isRunning, timeLeft, duration])
-
-  const stop = useCallback(() => {
-    clear()
-    setIsRunning(false)
-  }, [clear])
+  const start = useCallback(() => setIsRunning(true), []);
+  const stop = useCallback(() => setIsRunning(false), []);
 
   const reset = useCallback(() => {
-    clear()
-    setIsRunning(false)
-    setTimeLeft(duration)
-  }, [clear, duration])
+    setIsRunning(false);
+    setTime(initialTime);
+  }, [initialTime]);
 
   useEffect(() => {
     if (isRunning) {
-      intervalRef.current = window.setInterval(() => {
-        setTimeLeft((t) => {
-          // If duration is 0 (Passage Mode), we count down into negatives
-          // or handle logic to count up. Standard approach:
-          if (duration > 0 && t <= 1) {
-            clear()
-            setIsRunning(false)
-            return 0
+      timerRef.current = setInterval(() => {
+        setTime((prev) => {
+          if (mode === 'timed') {
+            // COUNT DOWN: Stop at 0
+            if (prev <= 1) {
+              setIsRunning(false);
+              return 0;
+            }
+            return prev - 1;
+          } else {
+            // COUNT UP: Keep going until text is finished
+            return prev + 1;
           }
-          return t - 1
-        })
-      }, 1000)
+        });
+      }, 1000);
     } else {
-      clear()
+      if (timerRef.current) clearInterval(timerRef.current);
     }
-    return clear
-  }, [isRunning, clear, duration])
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isRunning, mode]);
 
   return {
-    timeLeft,
-    // ✅ Calculate timeElapsed: Total duration minus what is left
-    timeElapsed: duration - timeLeft,
+    time,
     isRunning,
     start,
     stop,
     reset,
-    isFinished: duration > 0 && timeLeft === 0,
-  }
+    // In Timed mode, it's finished when time hits 0
+    // In Passage mode, it's finished when the typing hook says so
+    isFinished: mode === 'timed' && time === 0
+  };
 }

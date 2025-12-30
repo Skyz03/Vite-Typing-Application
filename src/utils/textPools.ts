@@ -1,41 +1,38 @@
 export type Difficulty = 'easy' | 'medium' | 'hard'
-
-export const textPools: Record<Difficulty, string[]> = {
-  easy: [
-    'cat dog sun sky tree book',
-    'red blue green yellow',
-    'hello world typing test',
-  ],
-  medium: [
-    'the quick brown fox jumps over the lazy dog',
-    'typing speed is a useful skill to practice',
-    'react and vite make development fast',
-  ],
-  hard: [
-    'complexity arises when abstraction leaks unexpectedly',
-    'synchronous code often appears simpler than asynchronous flows',
-    'performance optimization requires careful measurement',
-  ],
-}
-
 export type Mode = 'timed' | 'passage'
 
-export const PASSAGES = {
+export const VOCABULARY: Record<Difficulty, string[]> = {
   easy: [
-    'The sun began to set behind the distant mountains, casting a warm golden glow across the quiet valley below.',
-    'Programming is the art of telling another human what one wants the computer to do for them.',
+    'mac', 'ipad', 'ios', 'pro', 'air', 'pen', 'pod', 'app', 'hub', 'link',
+    'fast', 'thin', 'bold', 'pure', 'core', 'chip', 'm4', 'dock', 'view', 'sync'
   ],
   medium: [
-    'The archaeological expedition unearthed artifacts that complicated prevailing theories about Bronze Age trade networks and social structures.',
-    'In the world of software engineering, the ability to read and understand existing code is often more valuable than the ability to write new code.',
+    'retina', 'safari', 'silicon', 'icloud', 'widget', 'dynamic', 'island',
+    'ceramic', 'studio', 'display', 'thermal', 'haptic', 'optical', 'sensor',
+    'privacy', 'security', 'magsafe', 'keynote', 'design', 'process'
   ],
   hard: [
-    'Implementation of a red-black tree requires a sophisticated understanding of self-balancing binary search trees and rotation algorithms.',
-    'The phenomenon of quantum entanglement suggests that particles can remain connected such that the state of one instantaneously influences the other.',
-  ],
+    'unibody', 'enclosure', 'architecture', 'orchestration', 'computational',
+    'innovative', 'performance', 'sustainable', 'revolutionary', 'ergonomic',
+    'thunderbolt', 'accessibility', 'intelligence', 'augmented', 'seamlessly'
+  ]
 }
 
-export function getLongPassage(difficulty: 'easy' | 'medium' | 'hard') {
-  const pool = PASSAGES[difficulty]
-  return pool[Math.floor(Math.random() * pool.length)]
+export const PASSAGES: Record<Difficulty, string[]> = {
+  easy: [
+    "Design is not just what it looks like and feels like. Design is how it works.",
+    "The people who are crazy enough to think they can change the world are the ones who do.",
+    "Simple things should be simple, complex things should be possible."
+  ],
+  medium: [
+    "Innovation distinguishes between a leader and a follower. Character is the foundation of every great design.",
+    "Details matter. It’s worth waiting to get it right. Quality is much more important than quantity.",
+    "The ability to simplify means to eliminate the unnecessary so that the necessary may speak."
+  ],
+  hard: [
+    "We believe that we are on the face of the earth to make great products and that’s not changing.",
+    "Our goal is to create products that are as beautiful on the inside as they are on the outside, with uncompromising attention to detail.",
+    "Precision is the result of a meticulously planned orchestration between hardware and software, creating a profound user experience.",
+    "Sustainability is no longer an afterthought; it is woven into the very fabric of our manufacturing philosophy and material selection."
+  ]
 }
