@@ -1,23 +1,23 @@
 // hooks/useTimer.ts
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export function useTimer(initialTime: number, mode: 'timed' | 'passage') {
-  const [time, setTime] = useState(initialTime);
-  const [isRunning, setIsRunning] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [time, setTime] = useState(initialTime)
+  const [isRunning, setIsRunning] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Sync time if initialTime changes (e.g., when switching modes)
   useEffect(() => {
-    setTime(initialTime);
-  }, [initialTime]);
+    setTime(initialTime)
+  }, [initialTime])
 
-  const start = useCallback(() => setIsRunning(true), []);
-  const stop = useCallback(() => setIsRunning(false), []);
+  const start = useCallback(() => setIsRunning(true), [])
+  const stop = useCallback(() => setIsRunning(false), [])
 
   const reset = useCallback(() => {
-    setIsRunning(false);
-    setTime(initialTime);
-  }, [initialTime]);
+    setIsRunning(false)
+    setTime(initialTime)
+  }, [initialTime])
 
   useEffect(() => {
     if (isRunning) {
@@ -26,24 +26,24 @@ export function useTimer(initialTime: number, mode: 'timed' | 'passage') {
           if (mode === 'timed') {
             // COUNT DOWN: Stop at 0
             if (prev <= 1) {
-              setIsRunning(false);
-              return 0;
+              setIsRunning(false)
+              return 0
             }
-            return prev - 1;
+            return prev - 1
           } else {
             // COUNT UP: Keep going until text is finished
-            return prev + 1;
+            return prev + 1
           }
-        });
-      }, 1000);
+        })
+      }, 1000)
     } else {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current)
     }
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isRunning, mode]);
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [isRunning, mode])
 
   return {
     time,
@@ -53,6 +53,6 @@ export function useTimer(initialTime: number, mode: 'timed' | 'passage') {
     reset,
     // In Timed mode, it's finished when time hits 0
     // In Passage mode, it's finished when the typing hook says so
-    isFinished: mode === 'timed' && time === 0
-  };
+    isFinished: mode === 'timed' && time === 0,
+  }
 }

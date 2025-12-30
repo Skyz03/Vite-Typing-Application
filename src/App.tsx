@@ -11,8 +11,9 @@ export default function App() {
   // --- State ---
   const [difficulty, setDifficulty] = useState<Difficulty>('easy')
   const [isStarted, setIsStarted] = useState(false)
-  const [mode, setMode] = useState<'timed' | 'passage'>('timed');
+  const [mode, setMode] = useState<'timed' | 'passage'>('timed')
   const [text, setText] = useState(() => getAppText('timed', 'easy'))
+  const [hasInteracted, setHasInteracted] = useState(false)
 
   const [bestWpm, setBestWpm] = useState<number>(() => {
     const saved = localStorage.getItem('typing-pb')
@@ -20,26 +21,32 @@ export default function App() {
   })
 
   // --- Hooks ---
-  const initialTime = mode === 'timed' ? 60 : 0;
-  const timer = useTimer(initialTime, mode);
+  const initialTime = mode === 'timed' ? 60 : 0
+  const timer = useTimer(initialTime, mode)
 
   const typing = useKeyboardTyping(text, {
     // Only lock typing if the overlay is visible or the timer finished
     isLocked: !isStarted || (mode === 'timed' ? timer.isFinished : false),
   })
 
+  // Update your start logic
+  const handleStart = () => {
+    setHasInteracted(true)
+    setIsStarted(true)
+  }
+
   // --- Actions ---
   const restart = useCallback(
     (newDifficulty = difficulty, newMode = mode) => {
       setDifficulty(newDifficulty)
       setMode(newMode)
-      setIsStarted(false)
-      const newText = getAppText(newMode, newDifficulty);
+      setIsStarted(hasInteracted)
+      const newText = getAppText(newMode, newDifficulty)
       setText(newText)
       timer.reset()
       typing.reset()
     },
-    [difficulty, mode, timer, typing]
+    [difficulty, mode, timer, typing, hasInteracted]
   )
 
   // --- Logic for Progress & Finishing ---
@@ -64,17 +71,35 @@ export default function App() {
     }
   }, [typing.isFinished, timer.isRunning, timer])
 
-  // 3. Tab to Restart
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
-        e.preventDefault()
-        restart()
+    const handleAnyKey = (e: KeyboardEvent) => {
+      // 1. Ignore if the user is pressing a modifier key (Cmd, Alt, etc.)
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      // 2. Ignore the "Tab" key so it doesn't double-trigger with your restart logic
+      if (e.key === 'Tab') return
+
+      // 3. If we've interacted before but the test hasn't "started" yet, start it!
+      if (hasInteracted && !isStarted) {
+        setIsStarted(true)
       }
     }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [restart])
+
+    window.addEventListener('keydown', handleAnyKey)
+    return () => window.removeEventListener('keydown', handleAnyKey)
+  }, [hasInteracted, isStarted])
+
+  useEffect(() => {
+    const handleFirstStart = (e: KeyboardEvent) => {
+      // Only trigger if they haven't interacted and didn't hit a modifier key
+      if (!hasInteracted && !e.metaKey && !e.ctrlKey) {
+        handleStart()
+      }
+    }
+
+    window.addEventListener('keydown', handleFirstStart)
+    return () => window.removeEventListener('keydown', handleFirstStart)
+  }, [hasInteracted])
 
   // 4. Persistence
   useEffect(() => {
@@ -95,7 +120,7 @@ export default function App() {
           isNewRecord={isNewRecord}
           isBaseline={isBaseline}
           onRestart={() => {
-            if (isNewRecord) setBestWpm(typing.wpm);
+            if (isNewRecord) setBestWpm(typing.wpm)
             restart()
           }}
         />
@@ -109,11 +134,12 @@ export default function App() {
       <header className="glass-panel border-app-border/40 fixed top-0 left-0 z-50 w-full border-b transition-all duration-300">
         {/* Container: Responsive Max Width & Padding */}
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8 md:py-4">
-
           {/* Left Section: Logo & Branding */}
           <div className="flex items-center gap-3 md:gap-4">
             <div className="bg-txt-main text-app-surface btn-spring flex h-9 w-9 items-center justify-center rounded-xl shadow-sm md:h-11 md:w-11">
-              <span className="text-xl md:text-2xl leading-none select-none"></span>
+              <span className="text-xl leading-none select-none md:text-2xl">
+                
+              </span>
             </div>
             <div className="flex flex-col">
               <h1 className="text-txt-main text-base font-semibold tracking-tight md:text-lg lg:text-xl">
@@ -129,7 +155,7 @@ export default function App() {
           {/* Right Section: Stats & Action */}
           <div className="flex items-center gap-3">
             {/* PB Badge: Responsive sizing */}
-            <div className="bg-app-bg/50 border-app-border group flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all hover:border-txt-muted md:px-5 md:py-2">
+            <div className="bg-app-bg/50 border-app-border group hover:border-txt-muted flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all md:px-5 md:py-2">
               <div className="flex flex-col items-end leading-none">
                 <span className="text-txt-muted text-[8px] font-bold tracking-[0.15em] uppercase md:text-[9px]">
                   Best
@@ -138,7 +164,9 @@ export default function App() {
                   <span className="text-txt-main text-sm font-bold tabular-nums md:text-base">
                     {bestWpm}
                   </span>
-                  <span className="text-txt-muted text-[10px] font-semibold uppercase">WPM</span>
+                  <span className="text-txt-muted text-[10px] font-semibold uppercase">
+                    WPM
+                  </span>
                 </div>
               </div>
 
@@ -166,31 +194,18 @@ export default function App() {
         </div>
 
         {/* 3. Typing Stage */}
-        <section
-          className="group relative cursor-text"
-          onClick={() => !isStarted && setIsStarted(true)}
-        >
-          {/* Progress Bar for Passage Mode */}
-          {mode === 'passage' && (
-            <div className="bg-app-border/30 absolute -top-10 left-0 h-1.5 w-full overflow-hidden rounded-full">
-              <div
-                className="bg-type-primary h-full shadow-[0_0_8px_rgba(0,113,227,0.4)] transition-all duration-300 ease-out"
-                style={{
-                  width: `${(typing.typed.length / text.length) * 100}%`,
-                }}
-              />
-            </div>
-          )}
-
-          {!isStarted && <FocusOverlay onStart={() => setIsStarted(true)} />}
+        <section className="group relative w-full cursor-text">
+          {/* The Big Overlay - ONLY for the very first visit */}
+          {!hasInteracted && <FocusOverlay onStart={handleStart} />}
 
           <div
-            className={`transition-all duration-700 ${!isStarted
-              ? 'pointer-events-none scale-[0.98] opacity-30 blur-xl select-none'
-              : 'blur-0 scale-100 opacity-100'
-              }`}
+            className={`transition-all duration-500 ${
+              !hasInteracted
+                ? 'pointer-events-none scale-95 opacity-10 blur-2xl'
+                : 'blur-0 scale-100 opacity-100'
+            }`}
           >
-            <TextDisplay target={text} typed={typing.typed} />
+            <TextDisplay key={text} target={text} typed={typing.typed} />
           </div>
         </section>
 
@@ -202,10 +217,11 @@ export default function App() {
               <button
                 key={d}
                 onClick={() => restart(d, mode)}
-                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${difficulty === d
-                  ? 'bg-txt-main text-app-surface shadow-md'
-                  : 'text-txt-muted hover:text-txt-main'
-                  }`}
+                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${
+                  difficulty === d
+                    ? 'bg-txt-main text-app-surface shadow-md'
+                    : 'text-txt-muted hover:text-txt-main'
+                }`}
               >
                 {d.charAt(0).toUpperCase() + d.slice(1)}
               </button>
@@ -214,29 +230,29 @@ export default function App() {
 
           {/* Mode Segment */}
           <div className="flex flex-col items-center gap-4">
-
-            <div className="bg-app-surface p-1 rounded-full shadow-apple border border-app-border flex">
+            <div className="bg-app-surface shadow-apple border-app-border flex rounded-full border p-1">
               <button
                 onClick={() => restart(difficulty, 'timed')}
-                className={`px-6 py-1.5 rounded-full text-xs font-semibold transition-all btn-apple ${mode === 'timed'
-                  ? 'bg-txt-main text-app-surface shadow-sm'
-                  : 'text-txt-muted hover:text-txt-main'
-                  }`}
+                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${
+                  mode === 'timed'
+                    ? 'bg-txt-main text-app-surface shadow-sm'
+                    : 'text-txt-muted hover:text-txt-main'
+                }`}
               >
                 Timed (60s)
               </button>
               <button
                 onClick={() => restart(difficulty, 'passage')}
-                className={`px-6 py-1.5 rounded-full text-xs font-semibold transition-all btn-apple ${mode === 'passage'
-                  ? 'bg-txt-main text-app-surface shadow-sm'
-                  : 'text-txt-muted hover:text-txt-main'
-                  }`}
+                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${
+                  mode === 'passage'
+                    ? 'bg-txt-main text-app-surface shadow-sm'
+                    : 'text-txt-muted hover:text-txt-main'
+                }`}
               >
                 Passage
               </button>
             </div>
           </div>
-
 
           <button
             onClick={() => restart()}

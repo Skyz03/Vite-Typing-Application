@@ -3,36 +3,83 @@ export type Mode = 'timed' | 'passage'
 
 export const VOCABULARY: Record<Difficulty, string[]> = {
   easy: [
-    'mac', 'ipad', 'ios', 'pro', 'air', 'pen', 'pod', 'app', 'hub', 'link',
-    'fast', 'thin', 'bold', 'pure', 'core', 'chip', 'm4', 'dock', 'view', 'sync'
+    'mac',
+    'ipad',
+    'ios',
+    'pro',
+    'air',
+    'pen',
+    'pod',
+    'app',
+    'hub',
+    'link',
+    'fast',
+    'thin',
+    'bold',
+    'pure',
+    'core',
+    'chip',
+    'm4',
+    'dock',
+    'view',
+    'sync',
   ],
   medium: [
-    'retina', 'safari', 'silicon', 'icloud', 'widget', 'dynamic', 'island',
-    'ceramic', 'studio', 'display', 'thermal', 'haptic', 'optical', 'sensor',
-    'privacy', 'security', 'magsafe', 'keynote', 'design', 'process'
+    'retina',
+    'safari',
+    'silicon',
+    'icloud',
+    'widget',
+    'dynamic',
+    'island',
+    'ceramic',
+    'studio',
+    'display',
+    'thermal',
+    'haptic',
+    'optical',
+    'sensor',
+    'privacy',
+    'security',
+    'magsafe',
+    'keynote',
+    'design',
+    'process',
   ],
   hard: [
-    'unibody', 'enclosure', 'architecture', 'orchestration', 'computational',
-    'innovative', 'performance', 'sustainable', 'revolutionary', 'ergonomic',
-    'thunderbolt', 'accessibility', 'intelligence', 'augmented', 'seamlessly'
-  ]
+    'unibody',
+    'enclosure',
+    'architecture',
+    'orchestration',
+    'computational',
+    'innovative',
+    'performance',
+    'sustainable',
+    'revolutionary',
+    'ergonomic',
+    'thunderbolt',
+    'accessibility',
+    'intelligence',
+    'augmented',
+    'seamlessly',
+  ],
 }
 
 export const PASSAGES: Record<Difficulty, string[]> = {
   easy: [
-    "Design is not just what it looks like and feels like. Design is how it works.",
-    "The people who are crazy enough to think they can change the world are the ones who do.",
-    "Simple things should be simple, complex things should be possible."
+    'Design is not just what it looks like and feels like. Design is how it works.',
+    'The people who are crazy enough to think they can change the world are the ones who do.',
+    'Simple things should be simple, complex things should be possible.',
   ],
   medium: [
-    "Innovation distinguishes between a leader and a follower. Character is the foundation of every great design.",
-    "Details matter. It’s worth waiting to get it right. Quality is much more important than quantity.",
-    "The ability to simplify means to eliminate the unnecessary so that the necessary may speak."
+    'Innovation distinguishes between a leader and a follower. Character is the foundation of every great design.',
+    'Details matter. It’s worth waiting to get it right. Quality is much more important than quantity.',
+    'The ability to simplify means to eliminate the unnecessary so that the necessary may speak.',
   ],
   hard: [
-    "We believe that we are on the face of the earth to make great products and that’s not changing.",
-    "Our goal is to create products that are as beautiful on the inside as they are on the outside, with uncompromising attention to detail.",
-    "Precision is the result of a meticulously planned orchestration between hardware and software, creating a profound user experience.",
-    "Sustainability is no longer an afterthought; it is woven into the very fabric of our manufacturing philosophy and material selection."
-  ]
+    'We believe that we are on the face of the earth to make great products and that’s not changing.',
+    'Our goal is to create products that are as beautiful on the inside as they are on the outside, with uncompromising attention to detail.',
+    'Precision is the result of a meticulously planned orchestration between hardware and software, creating a profound user experience.',
+    'Sustainability is no longer an afterthought; it is woven into the very fabric of our manufacturing philosophy and material selection.',
+  ],
 }
