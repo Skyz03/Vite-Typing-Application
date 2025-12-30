@@ -106,20 +106,50 @@ export default function App() {
   // --- Main Typing View ---
   return (
     <main className="selection:bg-type-primary/20 relative flex min-h-screen flex-col items-center">
-      {/* 1. Sticky Frosted Header */}
-      <header className="glass-panel border-app-border/50 fixed top-0 z-40 flex w-full items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-txt-main text-app-surface rounded-lg px-3 py-2 shadow-sm">
-            <span className="text-xl leading-none"></span>
-          </div>
-          <h1 className="text-apple-text text-lg font-semibold tracking-tight">
-            Typing Test
-          </h1>
-        </div>
+      <header className="glass-panel border-app-border/40 fixed top-0 left-0 z-50 w-full border-b transition-all duration-300">
+        {/* Container: Responsive Max Width & Padding */}
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8 md:py-4">
 
-        <div className="bg-app-bg border-app-border text-txt-muted rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
-          Personal Best:{' '}
-          <span className="text-txt-main ml-1">{bestWpm} WPM</span>
+          {/* Left Section: Logo & Branding */}
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="bg-txt-main text-app-surface btn-spring flex h-9 w-9 items-center justify-center rounded-xl shadow-sm md:h-11 md:w-11">
+              <span className="text-xl md:text-2xl leading-none select-none"></span>
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-txt-main text-base font-semibold tracking-tight md:text-lg lg:text-xl">
+                Typing <span className="hidden sm:inline">Precision</span>
+              </h1>
+              {/* Tagline hidden on very small screens */}
+              <p className="text-txt-muted hidden text-[10px] font-medium tracking-wide md:block">
+                Designed for performance.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Section: Stats & Action */}
+          <div className="flex items-center gap-3">
+            {/* PB Badge: Responsive sizing */}
+            <div className="bg-app-bg/50 border-app-border group flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all hover:border-txt-muted md:px-5 md:py-2">
+              <div className="flex flex-col items-end leading-none">
+                <span className="text-txt-muted text-[8px] font-bold tracking-[0.15em] uppercase md:text-[9px]">
+                  Best
+                </span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-txt-main text-sm font-bold tabular-nums md:text-base">
+                    {bestWpm}
+                  </span>
+                  <span className="text-txt-muted text-[10px] font-semibold uppercase">WPM</span>
+                </div>
+              </div>
+
+              {/* Small separator icon */}
+              <div className="bg-type-primary/10 flex h-6 w-6 items-center justify-center rounded-full md:h-8 md:w-8">
+                <span className="text-xs md:text-sm">🏆</span>
+              </div>
+            </div>
+
+            {/* Mobile-only Menu or Icon if needed, otherwise clean */}
+          </div>
         </div>
       </header>
 
