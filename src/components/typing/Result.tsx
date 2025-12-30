@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import confetti from 'canvas-confetti'
+import { WpmRing } from './WpmRing'
 
 type ResultsProps = {
   wpm: number
@@ -89,7 +90,15 @@ export function Results({
 
       {/* Bento-style Stat Grid */}
       <div className="mb-12 grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-        <StatCard label="WPM" value={wpm} description="Words per minute" />
+        <div className="bg-app-surface border-app-border/50 shadow-apple flex flex-col items-center justify-center rounded-[2.5rem] border p-8 transition-all duration-500 md:col-span-1">
+          <span className="text-txt-muted mb-4 text-[10px] font-bold tracking-[0.2em] uppercase">
+            Speed Performance
+          </span>
+          <WpmRing wpm={wpm} targetWpm={120} />
+          <span className="text-txt-muted/60 mt-4 text-xs font-medium">
+            {wpm > 80 ? 'Exceptional Pace' : 'Steady Progress'}
+          </span>
+        </div>
         <StatCard
           label="Accuracy"
           value={`${accuracy}%`}

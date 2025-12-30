@@ -37,6 +37,7 @@
 }
 
 @layer utilities {
+
   /* --- Apple "Cupertino" Glassmorphism --- */
   .glass-panel {
     background: rgba(255, 255, 255, 0.7);
@@ -56,6 +57,7 @@
 
   /* --- Sparkle Animations (For High Scores) --- */
   @keyframes sparkle {
+
     0%,
     100% {
       transform: scale(0);
@@ -79,4 +81,20 @@
   .delay-700 {
     animation-delay: 700ms;
   }
+}
+
+@keyframes ghostSlide {
+  0% {
+    transform: translateX(10px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 0.2;
+  }
+}
+
+.ghost-predict {
+  animation: ghostSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

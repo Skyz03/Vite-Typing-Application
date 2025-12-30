@@ -14,6 +14,7 @@ export default function App() {
   const [mode, setMode] = useState<'timed' | 'passage'>('timed')
   const [text, setText] = useState(() => getAppText('timed', 'easy'))
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [showGhost, setShowGhost] = useState(true);
 
   const [bestWpm, setBestWpm] = useState<number>(() => {
     const saved = localStorage.getItem('typing-pb')
@@ -152,9 +153,37 @@ export default function App() {
             </div>
           </div>
 
+
+
           {/* Right Section: Stats & Action */}
-          <div className="flex items-center gap-3">
-            {/* PB Badge: Responsive sizing */}
+          <div className="flex items-center gap-4 md:gap-6">
+            {/* 1. Ghost Toggle - Styled to match Apple's minimalist settings */}
+            <div className="flex items-center gap-3">
+              <label className="flex flex-col items-end leading-none cursor-pointer" onClick={() => setShowGhost(!showGhost)}>
+                <span className="text-txt-muted text-[8px] font-bold tracking-[0.15em] uppercase md:text-[9px]">
+                  Predictive
+                </span>
+                <span className="text-txt-main text-[11px] font-medium hidden sm:block">
+                  Ghost
+                </span>
+              </label>
+
+              <button
+                onClick={() => setShowGhost(!showGhost)}
+                className={`relative inline-flex h-5 w-9 md:h-6 md:w-11 items-center rounded-full transition-colors duration-300 focus:outline-none shadow-inner ${showGhost ? 'bg-type-primary' : 'bg-app-border'
+                  }`}
+              >
+                <span
+                  className={`inline-block h-3.5 w-3.5 md:h-4 md:w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ${showGhost ? 'translate-x-4.5 md:translate-x-6' : 'translate-x-1'
+                    }`}
+                />
+              </button>
+            </div>
+
+            {/* 2. Vertical Divider (Optional but very Apple) */}
+            <div className="h-8 w-[1px] bg-app-border/40 hidden sm:block" />
+
+            {/* 3. PB Badge */}
             <div className="bg-app-bg/50 border-app-border group hover:border-txt-muted flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all md:px-5 md:py-2">
               <div className="flex flex-col items-end leading-none">
                 <span className="text-txt-muted text-[8px] font-bold tracking-[0.15em] uppercase md:text-[9px]">
@@ -170,13 +199,11 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Small separator icon */}
-              <div className="bg-type-primary/10 flex h-6 w-6 items-center justify-center rounded-full md:h-8 md:w-8">
+              {/* Trophy Icon */}
+              <div className="bg-type-primary/10 flex h-6 w-6 items-center justify-center rounded-full md:h-8 md:w-8 transition-transform group-hover:scale-110">
                 <span className="text-xs md:text-sm">🏆</span>
               </div>
             </div>
-
-            {/* Mobile-only Menu or Icon if needed, otherwise clean */}
           </div>
         </div>
       </header>
@@ -199,13 +226,15 @@ export default function App() {
           {!hasInteracted && <FocusOverlay onStart={handleStart} />}
 
           <div
-            className={`transition-all duration-500 ${
-              !hasInteracted
-                ? 'pointer-events-none scale-95 opacity-10 blur-2xl'
-                : 'blur-0 scale-100 opacity-100'
-            }`}
+            className={`transition-all duration-500 ${!hasInteracted
+              ? 'pointer-events-none scale-95 opacity-10 blur-2xl'
+              : 'blur-0 scale-100 opacity-100'
+              }`}
           >
-            <TextDisplay key={text} target={text} typed={typing.typed} />
+
+            <TextDisplay key={text} target={text}
+              typed={typing.typed}
+              showGhost={showGhost} />
           </div>
         </section>
 
@@ -217,11 +246,10 @@ export default function App() {
               <button
                 key={d}
                 onClick={() => restart(d, mode)}
-                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${
-                  difficulty === d
-                    ? 'bg-txt-main text-app-surface shadow-md'
-                    : 'text-txt-muted hover:text-txt-main'
-                }`}
+                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${difficulty === d
+                  ? 'bg-txt-main text-app-surface shadow-md'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
               >
                 {d.charAt(0).toUpperCase() + d.slice(1)}
               </button>
@@ -233,21 +261,19 @@ export default function App() {
             <div className="bg-app-surface shadow-apple border-app-border flex rounded-full border p-1">
               <button
                 onClick={() => restart(difficulty, 'timed')}
-                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${
-                  mode === 'timed'
-                    ? 'bg-txt-main text-app-surface shadow-sm'
-                    : 'text-txt-muted hover:text-txt-main'
-                }`}
+                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${mode === 'timed'
+                  ? 'bg-txt-main text-app-surface shadow-sm'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
               >
                 Timed (60s)
               </button>
               <button
                 onClick={() => restart(difficulty, 'passage')}
-                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${
-                  mode === 'passage'
-                    ? 'bg-txt-main text-app-surface shadow-sm'
-                    : 'text-txt-muted hover:text-txt-main'
-                }`}
+                className={`btn-apple rounded-full px-6 py-1.5 text-xs font-semibold transition-all ${mode === 'passage'
+                  ? 'bg-txt-main text-app-surface shadow-sm'
+                  : 'text-txt-muted hover:text-txt-main'
+                  }`}
               >
                 Passage
               </button>
