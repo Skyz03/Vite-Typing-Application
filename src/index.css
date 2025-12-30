@@ -1,46 +1,82 @@
+@import 'tailwindcss';
 
 @layer base {
   html {
-    /* Apply the font smoothing you requested */
+    /* High-end typography rendering */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+
+    /* Use the Apple Light Theme background */
     background-color: var(--color-app-bg);
     color: var(--color-txt-main);
+    scroll-behavior: smooth;
   }
 
   body {
     font-family: var(--font-sans);
   }
 
-  /* Custom Scrollbar to match the dark theme */
+  /* Minimalist Apple-style Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
+
   ::-webkit-scrollbar-track {
-    background: var(--color-app-bg);
+    background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     background: var(--color-app-border);
-    border-radius: 10px;
+    border-radius: 20px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--color-txt-muted);
   }
 }
 
 @layer utilities {
-    @keyframes sparkle {
-      0%, 100% { transform: scale(0); opacity: 0; }
-      50% { transform: scale(1.2); opacity: 1; }
+  /* --- Apple "Cupertino" Glassmorphism --- */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* --- Smooth Spring Interaction (Used on buttons/cards) --- */
+  .btn-spring {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .btn-spring:active {
+    transform: scale(0.96);
+  }
+
+  /* --- Sparkle Animations (For High Scores) --- */
+  @keyframes sparkle {
+    0%,
+    100% {
+      transform: scale(0);
+      opacity: 0;
     }
-  
-    .animate-sparkle {
-      animation: sparkle 1.5s ease-in-out infinite;
-    }
-  
-    .delay-500 {
-      animation-delay: 500ms;
+
+    50% {
+      transform: scale(1.2);
+      opacity: 1;
     }
   }
 
+  .animate-sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+}

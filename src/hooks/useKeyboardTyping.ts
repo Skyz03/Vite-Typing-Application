@@ -39,7 +39,7 @@ export function useKeyboardTyping(targetText: string, { isLocked }: Options) {
         // --- LOGIC FOR CHARACTER STAT ---
         // If the key pressed doesn't match the target char, increment errors
         if (e.key !== targetText[prev.length]) {
-          setTotalErrors(prev => prev + 1)
+          setTotalErrors((prev) => prev + 1)
         }
 
         const next = prev + e.key

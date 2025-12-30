@@ -1,32 +1,48 @@
 @import 'tailwindcss';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* --- Typography (Apple System Stack) --- */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
   --font-mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'SFMono-Regular', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
-  /* Layout & Surfaces */
-  --color-app-bg: #0d0d0d; /* Deep black background */
-  --color-app-surface: #171717; /* Slightly lighter cards/containers */
-  --color-app-border: #262626; /* Subtle borders */
 
-  /* Text States */
-  --color-txt-main: #e5e5e5; /* Bright text for finished/correct keys */
-  --color-txt-muted: #525252; /* Dimmed text for upcoming/untyped keys */
+  /* --- Layout & Surfaces (Apple Light Mode) --- */
+  --color-app-bg: #f5f5f7; /* Classic Apple off-white background */
+  --color-app-surface: #ffffff; /* Pure white cards/containers */
+  --color-app-border: #d2d2d7; /* Light grey hairline borders */
 
-  /* Brand & Feedback */
-  --color-type-primary: #eab308; /* The "Caret" and Highlight color (Yellow/Gold) */
-  --color-type-success: #22c55e; /* Correct keystrokes */
-  --color-type-error: #ef4444; /* Mistyped characters */
-  --color-type-error-bg: rgba(
-    239,
-    68,
-    68,
-    0.15
-  ); /* Soft background for errors */
+  /* --- Text States --- */
+  --color-txt-main: #1d1d1f; /* Stark Apple-black for typed text */
+  --color-txt-muted: #86868b; /* Secondary/Subhead grey for upcoming keys */
 
-  /* Stats */
-  --color-stat-wpm: #3b82f6; /* Blue for speed */
-  --color-stat-acc: #10b981; /* Emerald for accuracy */
+  /* --- Brand & Feedback --- */
+  --color-type-primary: #0071e3; /* Signature Apple Blue for Caret/Highlights */
+  --color-type-success: #34c759; /* iOS Green for correct keystrokes */
+  --color-type-error: #ff3b30; /* iOS Red for mistyped characters */
+  --color-type-error-bg: rgba(255, 59, 48, 0.1); /* Soft red tint */
+
+  /* --- Stats & Accents --- */
+  --color-stat-wpm: #1d1d1f; /* Stay monochrome for WPM like Apple health/activity */
+  --color-stat-acc: #0071e3; /* Use Brand Blue for accuracy */
+
+  /* --- Extra Apple-isms --- */
+  --shadow-apple:
+    0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-apple-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  --radius-apple: 1.25rem; /* 20px - standard for Apple large cards */
+}
+
+/* --- Utilities for the "Frosted" look --- */
+@utility glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@utility btn-apple {
+  @apply transition-all duration-200 active:scale-95;
 }

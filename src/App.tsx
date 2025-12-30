@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { getRandomText, getLongPassage } from './utils/textGenerator'
 import type { Difficulty, Mode } from './utils/textPools'
-import { DifficultySelect } from './components/controls/DifficultySelect'
-import { ModeSelect } from './components/controls/ModeSelect'
 import { TextDisplay } from './components/typing/TextDisplay'
 import { Results } from './components/typing/Result'
-import { Header } from './components/layout/Header'
 import { useTimer } from './hooks/useTimer'
 import { useKeyboardTyping } from './hooks/useKeyboardTyping'
 import { FocusOverlay } from './components/typing/FocusOverlay'
@@ -26,6 +23,7 @@ export default function App() {
   const timer = useTimer(initialTime)
 
   const typing = useKeyboardTyping(text, {
+    // Only lock typing if the overlay is visible or the timer finished
     isLocked: !isStarted || (mode === 'timed' ? timer.isFinished : false),
   })
 
@@ -47,8 +45,15 @@ export default function App() {
     [difficulty, mode, timer, typing]
   )
 
+  // --- Logic for Progress & Finishing ---
+  const isFinished =
+    (mode === 'timed' && timer.isFinished && typing.typed.length > 0) ||
+    typing.isFinished
+  const isBaseline = bestWpm === 0
+  const isNewRecord = typing.wpm > bestWpm
+
   // --- Effects ---
-  // 1. Start timer on first keypress (only if overlay is gone)
+  // 1. Start timer on first keypress
   useEffect(() => {
     if (isStarted && typing.typed.length === 1 && !timer.isRunning) {
       timer.start()
@@ -74,27 +79,22 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [restart])
 
-  // --- Logic for Results ---
-  const isFinished = (mode === 'timed' && timer.isFinished && typing.typed.length > 0) || typing.isFinished
-  const isBaseline = bestWpm === 0
-  const isNewRecord = typing.wpm > bestWpm
-
-  // Update localStorage only when finished
+  // 4. Persistence
   useEffect(() => {
     if (isFinished && isNewRecord) {
       localStorage.setItem('typing-pb', String(typing.wpm))
     }
   }, [isFinished, isNewRecord, typing.wpm])
 
-  // --- Render Results ---
+  // --- Render Results View ---
   if (isFinished) {
     return (
-      <div className="bg-app-bg flex min-h-screen items-center justify-center p-6 animate-in fade-in duration-500">
+      <div className="bg-app-bg animate-in fade-in flex min-h-screen items-center justify-center p-6 duration-700">
         <Results
           wpm={typing.wpm}
           accuracy={typing.accuracy}
           totalTyped={typing.typed.length}
-          totalErrors={typing.totalErrors} // Ensure your hook exports this
+          totalErrors={typing.totalErrors}
           isNewRecord={isNewRecord}
           isBaseline={isBaseline}
           onRestart={() => {
@@ -106,70 +106,117 @@ export default function App() {
     )
   }
 
+  // --- Main Typing View ---
   return (
-    <main className="bg-app-bg text-txt-main selection:bg-type-primary/30 min-h-screen p-8 antialiased">
-      <div className="mx-auto flex max-w-5xl flex-col gap-10">
-        <Header bestWpm={bestWpm} />
-
-        <div className="border-app-border flex flex-col items-center justify-between gap-6 border-b pb-6 md:flex-row">
-          <div className="flex items-center gap-10">
-            <StatItem label="WPM" value={typing.wpm} />
-            <StatItem
-              label="Accuracy"
-              value={`${typing.accuracy}%`}
-              className={typing.accuracy < 90 ? 'text-type-error' : 'text-stat-acc'}
-            />
-            <StatItem
-              label={mode === 'timed' ? 'Time Left' : 'Time Taken'}
-              value={`${mode === 'timed' ? timer.timeLeft : timer.timeElapsed}s`}
-              className={
-                mode === 'timed' && timer.timeLeft <= 5
-                  ? 'text-type-error animate-pulse'
-                  : 'text-type-primary'
-              }
-            />
+    <main className="selection:bg-type-primary/20 relative flex min-h-screen flex-col items-center">
+      {/* 1. Sticky Frosted Header */}
+      <header className="glass-panel border-app-border/50 fixed top-0 z-40 flex w-full items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-txt-main text-app-surface rounded-lg px-3 py-2 shadow-sm">
+            <span className="text-xl leading-none"></span>
           </div>
-
-          <div className="flex items-center gap-4">
-            <DifficultySelect value={difficulty} onChange={(d) => restart(d, mode)} />
-            <div className="bg-app-border mx-2 h-6 w-[1px]" />
-            <ModeSelect
-              disabled={typing.typed.length > 0 && !isFinished}
-              value={mode}
-              onChange={(m) => restart(difficulty, m)}
-            />
-          </div>
+          <h1 className="text-apple-text text-lg font-semibold tracking-tight">
+            Typing Test
+          </h1>
         </div>
 
-        {mode === 'passage' && (
-          <div className="bg-app-surface h-1 w-full rounded-full overflow-hidden -mb-6">
-            <div
-              className="bg-type-primary h-full transition-all duration-300 ease-out"
-              style={{ width: `${(typing.typed.length / text.length) * 100}%` }}
-            />
-          </div>
-        )}
+        <div className="bg-app-bg border-app-border text-txt-muted rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
+          Personal Best:{' '}
+          <span className="text-txt-main ml-1">{bestWpm} WPM</span>
+        </div>
+      </header>
 
+      {/* 2. Content Container */}
+      <div className="mt-32 flex w-full max-w-4xl flex-col gap-12 px-6">
+        {/* Stats Row */}
+        <div className="border-app-border flex justify-center gap-12 border-b pb-10 md:gap-24">
+          <AppleStat label="WPM" value={typing.wpm} />
+          <AppleStat label="Accuracy" value={`${typing.accuracy}%`} />
+          <AppleStat
+            label={mode === 'timed' ? 'Remaining' : 'Elapsed'}
+            value={`${mode === 'timed' ? timer.timeLeft : timer.timeElapsed}s`}
+          />
+        </div>
+
+        {/* 3. Typing Stage */}
         <section
-          className="relative group cursor-pointer"
+          className="group relative cursor-text"
           onClick={() => !isStarted && setIsStarted(true)}
         >
+          {/* Progress Bar for Passage Mode */}
+          {mode === 'passage' && (
+            <div className="bg-app-border/30 absolute -top-10 left-0 h-1.5 w-full overflow-hidden rounded-full">
+              <div
+                className="bg-type-primary h-full shadow-[0_0_8px_rgba(0,113,227,0.4)] transition-all duration-300 ease-out"
+                style={{
+                  width: `${(typing.typed.length / text.length) * 100}%`,
+                }}
+              />
+            </div>
+          )}
+
           {!isStarted && <FocusOverlay onStart={() => setIsStarted(true)} />}
-          <div className={`transition-all duration-700 ${!isStarted ? 'blur-md select-none opacity-50' : 'blur-0 opacity-100'}`}>
+
+          <div
+            className={`transition-all duration-700 ${
+              !isStarted
+                ? 'pointer-events-none scale-[0.98] opacity-30 blur-xl select-none'
+                : 'blur-0 scale-100 opacity-100'
+            }`}
+          >
             <TextDisplay target={text} typed={typing.typed} />
           </div>
         </section>
 
-        <footer className="mt-4 flex flex-col items-center gap-4">
+        {/* 4. Controls - Segmented Pill Selectors */}
+        <div className="mt-4 flex flex-col items-center justify-center gap-6 md:flex-row">
+          {/* Difficulty Segment */}
+          <div className="bg-app-surface shadow-apple border-app-border flex rounded-full border p-1">
+            {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => restart(d, mode)}
+                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all ${
+                  difficulty === d
+                    ? 'bg-txt-main text-app-surface shadow-md'
+                    : 'text-txt-muted hover:text-txt-main'
+                }`}
+              >
+                {d.charAt(0).toUpperCase() + d.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Mode Segment */}
+          <div className="bg-app-surface shadow-apple border-app-border flex rounded-full border p-1">
+            {(['timed', 'passage'] as Mode[]).map((m) => (
+              <button
+                key={m}
+                disabled={typing.typed.length > 0 && !isFinished}
+                onClick={() => restart(difficulty, m)}
+                className={`btn-spring rounded-full px-6 py-1.5 text-sm font-medium transition-all disabled:opacity-50 ${
+                  mode === m
+                    ? 'bg-txt-main text-app-surface shadow-md'
+                    : 'text-txt-muted hover:text-txt-main'
+                }`}
+              >
+                {m.charAt(0).toUpperCase() + m.slice(1)}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={() => restart()}
-            className="bg-app-surface border-app-border text-txt-muted hover:border-txt-muted/50 group flex items-center gap-3 rounded-2xl border px-6 py-3 transition-all hover:text-white active:scale-95"
+            className="btn-spring bg-app-surface border-app-border text-txt-main shadow-apple hover:bg-app-bg flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+            title="Restart (Tab)"
           >
-            <span className="text-sm font-bold tracking-widest uppercase">Restart Test</span>
-            <span className="text-xl transition-transform duration-500 group-hover:rotate-180">↺</span>
+            ↺
           </button>
-          <p className="text-txt-muted/40 text-[10px] font-bold tracking-widest uppercase">
-            Press <kbd className="bg-app-surface border-app-border rounded border px-1.5 py-0.5">Tab</kbd> to restart
+        </div>
+
+        <footer className="mt-8 text-center">
+          <p className="text-txt-muted text-[10px] font-bold tracking-[0.2em] uppercase">
+            Built for speed & precision
           </p>
         </footer>
       </div>
@@ -177,14 +224,20 @@ export default function App() {
   )
 }
 
-function StatItem({ label, value, className = 'text-white' }: { label: string; value: string | number; className?: string }) {
+function AppleStat({
+  label,
+  value,
+}: {
+  label: string
+  value: string | number
+}) {
   return (
-    <div className="flex flex-col border-l border-app-border pl-10 first:border-l-0 first:pl-0">
-      <span className="text-txt-muted font-sans text-[10px] font-black tracking-[0.2em] uppercase leading-relaxed">
-        {label}
-      </span>
-      <span className={`font-mono text-3xl font-black tracking-tighter ${className}`}>
+    <div className="flex flex-col items-center">
+      <span className="text-txt-main text-5xl font-bold tracking-tighter tabular-nums md:text-7xl">
         {value}
+      </span>
+      <span className="text-txt-muted mt-2 text-[10px] font-bold tracking-[0.15em] uppercase md:text-xs">
+        {label}
       </span>
     </div>
   )
