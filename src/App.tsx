@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getAppText } from './utils/textGenerator'
-import type { Difficulty, Mode } from './utils/textPools'
+import type { Difficulty } from './utils/textPools'
 import { TextDisplay } from './components/typing/TextDisplay'
 import { Results } from './components/typing/Result'
 import { useTimer } from './hooks/useTimer'

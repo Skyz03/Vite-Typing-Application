@@ -1,5 +1,3 @@
-import React from 'react';
-
 type TextDisplayProps = {
   target: string;
   typed: string;
